@@ -1,4 +1,5 @@
-require('dotenv').config()
+const path = require('path')
+require('dotenv').config({ path: path.join(__dirname, '../../.env') })
 
 //The pg module is the postgres module that allows easir communication to the database
 const { Pool } = require('pg')

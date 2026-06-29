@@ -1,0 +1,12 @@
+### 
+GET http://localhost:4000/api/health
+
+###
+
+GET http://localhost:4000/api/auth/me
+
+###testing if the server is running, in order to test a user has to be authenticated otherwise, you get "Not logged in" message
+
+
+###
+POST http://localhost:4000/api/applications/2/review
