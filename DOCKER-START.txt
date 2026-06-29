@@ -1,0 +1,77 @@
+============================================================
+  HOW TO RUN THIS PROJECT WITH DOCKER (beginner guide)
+============================================================
+
+WHAT IS THIS?
+-------------
+Instead of opening 3 terminals (database, backend, frontend),
+Docker runs all 3 for you with ONE command.
+
+WHAT YOU NEED FIRST
+-------------------
+1. Install "Docker Desktop" for Windows
+   https://www.docker.com/products/docker-desktop/
+
+2. Open Docker Desktop and wait until it says it is running
+
+3. STOP your normal npm servers if they are running
+   (Ctrl+C in those terminals)
+   Otherwise ports 4000 and 5173 might clash.
+
+
+HOW TO START EVERYTHING
+-----------------------
+1. Open PowerShell
+
+2. Go to the project folder:
+
+   cd "C:\Users\munembos\Downloads\Programs\nodejs projects\Submission_Approval_Workflow"
+
+3. Run this (first time takes a few minutes):
+
+   docker compose up --build
+
+4. Wait until you see the backend say something like:
+   "Server is running on http://localhost:4000"
+
+5. Open your browser:
+   http://localhost:5173
+
+
+TEST LOGINS
+-----------
+Applicant: applicant@demo.com  /  Password123!
+Reviewer:  reviewer@demo.com   /  Password123!
+
+
+HOW TO STOP
+-----------
+Press Ctrl+C in the Docker terminal, then run:
+
+   docker compose down
+
+
+TROUBLESHOOTING (common problems)
+---------------------------------
+Problem: "port is already allocated"
+Fix: Stop npm run dev servers, or close anything using port 4000/5173/5432
+
+Problem: "docker is not recognized"
+Fix: Install Docker Desktop and restart your computer
+
+Problem: Login says "Server error"
+Fix: Wait 30 seconds for database to finish starting, refresh and try again
+
+Problem: Want a fresh database
+Fix: docker compose down -v
+     (WARNING: -v deletes database data, then run docker compose up --build again)
+
+
+WHAT EACH FILE DOES (quick map)
+-------------------------------
+docker-compose.yml     = starts db + backend + frontend together
+Backend/Dockerfile     = recipe for the API
+Frontend/Dockerfile    = recipe for the React website
+Frontend/nginx.conf    = tiny web server config for React pages
+
+============================================================
