@@ -28,6 +28,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' })
     }
 
+    if (!process.env.JWT_SECRET) {
+      console.error('Login error: JWT_SECRET is missing. Check Backend/.env')
+      return res.status(500).json({ error: 'Server misconfigured' })
+    }
+
     const token = jwt.sign(
       {
         id: user.id,
