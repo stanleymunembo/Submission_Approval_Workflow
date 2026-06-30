@@ -11,14 +11,17 @@ Every status change is saved in an **audit log** (who did what and when).
 
 ---
 
-## Live app (for assessors)
+## Live app 
 
-> **Before you submit:** deploy the app online and paste your URL below.
 
 | | |
 |---|---|
-| **Website** | _YOUR LIVE URL HERE_ |
-| **API check** | _YOUR API URL + /api/health_ |
+| **Frontend app URL ** | https://submission-approval-workflow-app.onrender.com/login |
+| **Backend API check URL** | https://submission-approval-workflow-api.onrender.com/api/health|
+
+
+
+
 
 **Test logins**
 
@@ -27,7 +30,7 @@ Every status change is saved in an **audit log** (who did what and when).
 | Applicant | applicant@demo.com | Password123! |
 | Reviewer | reviewer@demo.com | Password123! |
 
-Assessors should open the website link and log in — no install needed.
+
 
 **Step-by-step deploy guide:** see `RENDER-DEPLOY.txt`
 
