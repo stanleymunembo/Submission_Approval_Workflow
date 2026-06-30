@@ -34,13 +34,6 @@ Every status change is saved in an **audit log** (who did what and when).
 
 **Step-by-step deploy guide:** see `RENDER-DEPLOY.txt`
 
----
-
-## Git repository
-
-Code is in Git. Submit the repo link (public, or private with assessor access).
-
----
 
 ## Run on your computer
 
