@@ -157,7 +157,6 @@ DRAFT  →  SUBMITTED  →  UNDER_REVIEW  →  APPROVED
 - Email notifications
 - Search and filters on long lists
 - Prettier UI
-- More automated tests in the browser (Playwright)
 - Deploy script so hosting is one click
 
 ---
@@ -166,8 +165,8 @@ DRAFT  →  SUBMITTED  →  UNDER_REVIEW  →  APPROVED
 
 | Tool | What I used it for |
 |------|-------------------|
-| **Cursor (AI chat)** | Help planning the project, writing backend and frontend code, Docker files, fixing bugs, writing this README |
-| **Me** | Checked all code, ran tests, tested in Postman and the browser, decided what to keep or change |
+| Cursor (AI chat)** | Help planning the project, writing backend and frontend code, Docker files, fixing bugs
+| Myself | Checked all code, ran tests, tested in Postman and the browser, decided what to keep or change |
 
 AI helped like a tutor sitting next to me — I still read the code and tested everything myself.
 
