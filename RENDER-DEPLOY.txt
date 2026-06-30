@@ -1,0 +1,158 @@
+============================================================
+  DEPLOY ON RENDER — step by step (beginner guide)
+============================================================
+
+OVERVIEW
+--------
+You will create 3 things on Render:
+  1. PostgreSQL database
+  2. Backend (API)
+  3. Frontend (website)
+
+Do them IN ORDER.
+
+
+STEP 0 — Push latest code to GitHub
+------------------------------------
+Render pulls code from GitHub. Commit and push first:
+
+  git add .
+  git commit -m "Prepare for Render deployment"
+  git push
+
+Make sure these files are in the repo:
+  - Backend/Scripts/init_render_db.js  (auto-creates tables on first run)
+  - Backend/src/config/db.js           (reads DATABASE_URL from Render)
+
+
+STEP 1 — Create a Render account
+---------------------------------
+  1. Go to https://render.com
+  2. Sign up (GitHub login is easiest)
+
+
+STEP 2 — Create the database
+-----------------------------
+  1. Dashboard → New + → PostgreSQL
+  2. Name: submission-db (or any name)
+  3. Plan: Free
+  4. Create Database
+  5. Wait until status is "Available"
+  6. Keep this page open — you will link it to the backend later
+
+  (You do NOT need to run SQL files manually — backend does it on first start.)
+
+
+STEP 3 — Deploy the backend (API)
+----------------------------------
+  1. Dashboard → New + → Web Service
+  2. Connect your GitHub repo
+  3. Settings:
+
+     Name:            submission-api
+     Root Directory:  Backend
+     Runtime:         Node
+     Build Command:   npm install
+     Start Command:   npm start
+     Plan:            Free
+
+  4. Environment variables (click Add Environment Variable):
+
+     Key              Value
+     ---              -----
+     NODE_ENV         production
+     JWT_SECRET       pick-any-long-random-string-here
+
+  5. Link the database:
+     - Scroll to "Connections" or "Linked PostgreSQL"
+     - Link the database you created in Step 2
+     - Render auto-adds DATABASE_URL
+
+  6. Click Create Web Service
+  7. Wait for deploy to finish (green "Live")
+  8. Copy your backend URL — looks like:
+     https://submission-api.onrender.com
+
+  9. Test in browser:
+     https://YOUR-BACKEND-URL.onrender.com/api/health
+     Should say: {"message":"Server is running"}
+
+  10. Check Logs tab — you should see:
+      "Database connected"
+      "First run — creating tables and demo data..."
+      OR "Database already set up — skipping init"
+
+
+STEP 4 — Deploy the frontend (website)
+---------------------------------------
+  1. Dashboard → New + → Static Site
+  2. Connect same GitHub repo
+  3. Settings:
+
+     Name:            submission-app
+     Root Directory:  Frontend
+     Build Command:   npm install && npm run build
+     Publish Directory: dist
+     Plan:            Free
+
+  4. Environment variable (IMPORTANT — set before first build):
+
+     Key              Value
+     ---              -----
+     VITE_API_URL     https://YOUR-BACKEND-URL.onrender.com
+
+     (Use the real URL from Step 3 — no trailing slash)
+
+  5. Create Static Site
+  6. Wait for deploy
+  7. Copy frontend URL — looks like:
+     https://submission-app.onrender.com
+
+
+STEP 5 — Test the live app
+---------------------------
+  1. Open your frontend URL
+  2. Log in:
+     applicant@demo.com / Password123!
+     reviewer@demo.com  / Password123!
+
+  Note: Free Render apps "sleep" after ~15 min idle.
+  First visit may take 30–60 seconds to wake up.
+
+
+STEP 6 — Update README
+----------------------
+  Open README.md and fill in:
+
+     Website:  https://submission-app.onrender.com  (your real URL)
+     API:      https://submission-api.onrender.com/api/health
+
+  Commit and push the README update.
+
+
+STEP 7 — Submit
+----------------
+  - Git repo link (public or private with assessor access)
+  - README has live URL + test logins
+
+
+TROUBLESHOOTING
+---------------
+Login says "Server error"
+  → Backend Logs on Render — look for database or JWT errors
+  → Check DATABASE_URL is linked to backend
+  → Check JWT_SECRET is set
+
+Frontend loads but login fails / network error
+  → VITE_API_URL must match backend URL exactly
+  → Redeploy frontend after fixing VITE_API_URL
+  (Static sites bake the API URL in at build time)
+
+Backend build fails
+  → Root Directory must be: Backend
+
+Frontend build fails
+  → Root Directory must be: Frontend
+  → Publish Directory must be: dist
+
+============================================================
