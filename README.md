@@ -166,7 +166,7 @@ DRAFT  →  SUBMITTED  →  UNDER_REVIEW  →  APPROVED
 | Tool | What I used it for |
 |------|-------------------|
 | Cursor (AI chat)** | Help planning the project, writing backend and frontend code, Docker files, fixing bugs
-| Myself | Checked all code, ran tests, tested in Postman and the browser, decided what to keep or change |
+| Myself | Checked all code, ran tests, tested in Postman and the browser, decided what to keep or change  and i managed the repository. No automated git actions. these allowed to create meaningful issues/branches for each development sections.
 
 AI helped like a tutor sitting next to me — I still read the code and tested everything myself.
 
