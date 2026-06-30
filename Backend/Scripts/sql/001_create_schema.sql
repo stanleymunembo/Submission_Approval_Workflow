@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS audit_logs;
 DROP TABLE IF EXISTS applications;
 DROP TABLE IF EXISTS users;
 
--- 1. Users table
+-- 1. Users table (Defines the user and their role)
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -18,7 +18,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- 2. Applications table
+-- 2. Applications table (The created applications, with default Draft for new applications)
 CREATE TABLE applications (
     id SERIAL PRIMARY KEY,
     owner_id INTEGER NOT NULL REFERENCES users(id),
@@ -32,7 +32,7 @@ CREATE TABLE applications (
     submitted_at TIMESTAMP
 );
 
--- 3. Audit log table
+-- 3. Audit log table (Keeps track of all the audits, on the status transition)
 CREATE TABLE audit_logs (
     id SERIAL PRIMARY KEY,
     application_id INTEGER NOT NULL REFERENCES applications(id),

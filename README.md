@@ -1,101 +1,192 @@
 # Submission & Approval Workflow
 
-Two-sided web app: **Applicants** submit and track applications; **Reviewers** approve, reject, or return them. Status changes are logged in an audit trail.
+A simple web app with two sides:
 
-**Stack:** 
-    React + TypeScript (Vite) 
-	Node.js + Express 
-	PostgreSQL 
-	JWT
+- **Applicant** — creates applications, submits them, tracks status
+- **Reviewer** — sees the queue, approves, rejects, or sends back with a comment
 
-## Project layout
+Every status change is saved in an **audit log** (who did what and when).
 
-```
-Backend/     API, SQL scripts, tests
-Frontend/    React UI
+**Built with:** React · Node.js · PostgreSQL
 
+---
 
-## Demo logins
+## Live app (for assessors)
 
-| Role      | Email                | Password      |
-|-----------|----------------------|---------------|
-| Applicant | applicant@demo.com   | Password123!  |
-| Reviewer  | reviewer@demo.com    | Password123!  |
+> **Before you submit:** deploy the app online and paste your URL below.
 
-## Status flow
+| | |
+|---|---|
+| **Website** | _YOUR LIVE URL HERE_ |
+| **API check** | _YOUR API URL + /api/health_ |
 
-DRAFT → SUBMITTED → UNDER_REVIEW → APPROVED / REJECTED / RETURNED
-```
+**Test logins**
 
-- Applicant: create, edit (draft/returned only), submit
-- Reviewer: start review, approve, reject, return (comment required for reject/return)
+| Who | Email | Password |
+|-----|-------|----------|
+| Applicant | applicant@demo.com | Password123! |
+| Reviewer | reviewer@demo.com | Password123! |
 
-## Run manually
+Assessors should open the website link and log in — no install needed.
 
-**Requires:** Node.js, PostgreSQL, npm
+**Step-by-step deploy guide:** see `RENDER-DEPLOY.txt`
 
-### 1. Database
+---
 
-Create database `Applicant_Reviewer_db`, then run in order:
+## Git repository
 
-1. `Backend/Scripts/sql/001_create_schema.sql`
-2. `Backend/Scripts/sql/002_seed_data.sql`
+Code is in Git. Submit the repo link (public, or private with assessor access).
 
-### 2. Backend
+---
 
-powershell
+## Run on your computer
+
+You need: **Node.js**, **PostgreSQL**, **npm**  
+(Or use **Docker Desktop** — see bottom of this section.)
+
+### 1. Set up the database
+
+1. Open pgAdmin (or psql).
+2. Create a database called: `Applicant_Reviewer_db`
+3. Run these two files **in order**:
+   - `Backend/Scripts/sql/001_create_schema.sql` — creates tables
+   - `Backend/Scripts/sql/002_seed_data.sql` — adds demo users and sample data
+
+### 2. Start the backend (API)
+
+```powershell
 cd Backend
-copy .env.example .env   # set DB_PASSWORD and JWT_SECRET
+copy .env.example .env
+```
+
+Open `.env` and set your Postgres password and a secret key for JWT:
+
+```
+DB_PASSWORD=your_postgres_password
+JWT_SECRET=any_random_secret_string
+```
+
+Then:
+
+```powershell
 npm install
 npm run dev
+```
 
+You should see: `Server is running on http://localhost:4000`  
+Check: http://localhost:4000/api/health
 
-API: http://localhost:4000
+### 3. Start the frontend (website)
 
-### 3. Frontend
-powershell
+Open a **new** terminal:
+
+```powershell
 cd Frontend
 npm install
 npm run dev
 ```
 
-App: http://localhost:5173
+Open: http://localhost:5173
 
+Log in with the test accounts above.
 
-## Run with Docker
+### Or use Docker (all 3 in one command)
 
-**Requires:** Docker Desktop
+If Docker Desktop is installed:
 
-From project root:
-
-powershell
+```powershell
 docker compose up --build
+```
 
+Then open http://localhost:5173 — database starts automatically.  
+Problems? Read `DOCKER-START.txt`.
 
-- App: http://localhost:5173
-- API: http://localhost:4000/api/health
-- Database and seed data start automatically on first run
-
-See `DOCKER-START.txt` if the build fails.
-
-
-
-## Tests
+### Run tests
 
 ```powershell
 cd Backend
 npm test
+```
 
+---
 
-25 tests (workflow rules + auth).
+## Data model (how data is stored)
 
-## Main API routes
+Three tables in PostgreSQL:
 
-| Route | Who |
-|-------|-----|
-| `POST /api/auth/login` | Both |
-| `GET /api/applications/mine` | Applicant |
-| `POST /api/applications` | Applicant |
-| `POST /api/applications/:id/submit` | Applicant |
-| `GET /api/applications/queue` | Reviewer |
-| `POST /api/applications/:id/review` | Reviewer |
+| Table | What it stores |
+|-------|----------------|
+| **users** | People who log in (email, password, role) |
+| **applications** | Each submission (title, category, status, owner) |
+| **audit_logs** | History of every status change |
+
+**How they connect**
+
+- Each application belongs to one user (`owner_id`)
+- Each audit log row links to an application and the person who acted
+
+**Application statuses (in order)**
+
+```
+DRAFT  →  SUBMITTED  →  UNDER_REVIEW  →  APPROVED
+                                      →  REJECTED
+                                      →  RETURNED  (applicant can fix and resubmit)
+```
+
+### Why I designed it this way
+
+- **Rules live in the backend** — the server blocks bad status changes, not just the browser.
+- **Separate audit table** — old statuses are never deleted; you can always see the history.
+- **Simple roles** — only `applicant` and `reviewer`; keeps auth easy to follow.
+- **JWT tokens** — after login, the API knows who you are without storing sessions in memory.
+
+---
+
+## Trade-offs (what I skipped and why)
+
+**Kept simple for this assignment**
+
+- No sign-up page (demo users only)
+- No emails when status changes
+- No file attachments
+- Basic look — focus on workflow working correctly
+
+**If I had more time**
+
+- Sign-up and forgot-password
+- Email notifications
+- Search and filters on long lists
+- Prettier UI
+- Deploy script so hosting is one click
+
+---
+
+## AI tools I used
+
+| Tool | What I used it for |
+|------|-------------------|
+| Cursor (AI chat)** | Help planning the project, writing backend and frontend code, Docker files, fixing bugs
+| Myself | Checked all code, ran tests, tested in Postman and the browser, decided what to keep or change  and i managed the repository. No automated git actions. these allowed to create meaningful issues/branches for each development sections.
+
+AI helped like a tutor sitting next to me — I still read the code and tested everything myself.
+
+---
+
+## Folder structure
+
+```
+Backend/       → API + database scripts + tests
+Frontend/        → React website
+docker-compose.yml → run everything with Docker
+```
+
+## Main API endpoints
+
+| What | Route | Who |
+|------|-------|-----|
+| Log in | POST /api/auth/login | Everyone |
+| My applications | GET /api/applications/mine | Applicant |
+| Create application | POST /api/applications | Applicant |
+| Submit | POST /api/applications/:id/submit | Applicant |
+| Review queue | GET /api/applications/queue | Reviewer |
+| Approve / reject / return | POST /api/applications/:id/review | Reviewer |
