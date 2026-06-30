@@ -1,0 +1,149 @@
+============================================================
+  HOW TO RUN THIS PROJECT WITH DOCKER (beginner guide)
+============================================================
+
+WHAT IS THIS?
+-------------
+Docker runs ALL 3 parts of the app with ONE command:
+  1) database (PostgreSQL)
+  2) backend (API)
+  3) frontend (website)
+
+You do NOT need to install PostgreSQL separately when using Docker.
+The database is included in docker-compose.yml.
+
+WHAT YOU NEED FIRST
+-------------------
+1. Install "Docker Desktop" for Windows
+   https://www.docker.com/products/docker-desktop/
+
+2. Open Docker Desktop and wait until it says it is running
+
+3. STOP your normal npm servers AND local PostgreSQL if running
+   (Ctrl+C in those terminals)
+   Otherwise ports 4000, 5173, or 5432 might clash.
+
+
+HOW TO START EVERYTHING
+-----------------------
+1. Open PowerShell
+
+2. Go to the project folder:
+
+   cd "C:\Users\munembos\Downloads\Programs\nodejs projects\Submission_Approval_Workflow"
+
+3. Run this (first time takes a few minutes):
+
+   docker compose up --build
+
+4. Wait until you see logs like:
+   - database: ready to accept connections
+   - backend:  Server is running on http://localhost:4000
+
+5. Open your browser:
+   http://localhost:5173
+
+
+TEST LOGINS
+-----------
+Applicant: applicant@demo.com  /  Password123!
+Reviewer:  reviewer@demo.com   /  Password123!
+
+
+HOW TO STOP
+-----------
+Press Ctrl+C in the Docker terminal, then run:
+
+   docker compose down
+
+
+TROUBLESHOOTING (common problems)
+---------------------------------
+Problem: "short read ... unexpected EOF" (often at WORKDIR or FROM node:20-alpine)
+Fix: Docker failed to download the Node image — NOT a bug in your React/Express code.
+  Do these steps IN ORDER:
+
+  Step A — Cancel the build (Ctrl+C) if it has been running a long time
+
+  Step B — Pull base images manually (wait until each one finishes):
+
+     docker pull node:20-alpine
+     docker pull nginx:alpine
+     docker pull postgres:16-alpine
+
+  Step C — Clean broken Docker cache:
+
+     docker compose down
+     docker builder prune -f
+     docker system prune -f
+
+  Step D — Rebuild from project root:
+
+     cd "C:\Users\munembos\Downloads\Programs\nodejs projects\Submission_Approval_Workflow"
+     docker compose build --no-cache
+     docker compose up
+
+  Step E — If still failing:
+     1. Restart Docker Desktop (right-click tray icon → Restart)
+     2. Check you have at least 10 GB free disk space on C:
+     3. Turn off VPN temporarily
+     4. Docker Desktop → Settings → Resources → increase Disk image size
+     5. Try Step B and D again
+
+  Step F — Last resort: Docker Desktop → Troubleshoot → Clean / Purge data
+     (then run Step B and D again)
+
+Problem: "failed to compute cache key" or "short read ... unexpected EOF" (during COPY)
+Fix:
+  1) Run from PROJECT ROOT (folder with docker-compose.yml)
+  2) Clear old Docker cache, then rebuild:
+
+     docker compose down
+     docker builder prune -f
+     docker compose build --no-cache
+     docker compose up
+
+  3) If still failing, restart Docker Desktop, then try step 2 again
+
+  4) Make sure these exist:
+     - Backend/package-lock.json
+     - Frontend/package-lock.json
+     - Backend/Scripts/sql/001_create_schema.sql
+     - Backend/Scripts/sql/002_seed_data.sql
+
+Problem: "port is already allocated"
+Fix: Stop npm run dev servers, or close anything using port 4000/5173/5432
+
+Problem: "docker is not recognized"
+Fix: Install Docker Desktop and restart your computer
+
+Problem: Login says "Server error"
+Fix: Wait 30 seconds for database to finish starting, refresh and try again
+
+Problem: Want a fresh database
+Fix: docker compose down -v
+     (WARNING: -v deletes database data, then run docker compose up --build again)
+
+
+WHAT EACH FILE DOES (quick map)
+-------------------------------
+docker-compose.yml     = starts database + backend + frontend together
+Backend/Scripts/sql/   = 001 creates tables, 002 adds demo data (auto on first run)
+Backend/Dockerfile     = recipe for the API
+Frontend/Dockerfile    = recipe for the React website
+Frontend/nginx.conf    = tiny web server config for React pages
+
+HOW THE DATABASE STARTS IN DOCKER
+---------------------------------
+First time you run "docker compose up --build":
+  1. PostgreSQL container starts
+  2. Creates database Applicant_Reviewer_db
+  3. Runs 001_create_schema.sql (users, applications, audit_logs)
+  4. Runs 002_seed_data.sql (demo logins + sample applications)
+  5. Backend connects using DB_HOST=database
+
+Fresh reset (deletes all Docker DB data):
+  docker compose down -v
+  docker compose up --build
+
+============================================================
