@@ -117,8 +117,22 @@ Fix: Stop npm run dev servers, or close anything using port 4000/5173/5432
 Problem: "docker is not recognized"
 Fix: Install Docker Desktop and restart your computer
 
-Problem: Login says "Server error"
-Fix: Wait 30 seconds for database to finish starting, refresh and try again
+Problem: Login says "Server error" in Docker
+Fix:
+  1) Reset database and rebuild (most common fix):
+
+     docker compose down -v
+     docker compose up --build
+
+  2) Check backend logs:
+
+     docker logs submission-backend
+
+  3) Check database logs:
+
+     docker logs submission-database
+
+  Look for "relation users does not exist" or "Database not ready"
 
 Problem: Want a fresh database
 Fix: docker compose down -v

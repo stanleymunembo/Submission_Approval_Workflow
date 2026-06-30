@@ -35,10 +35,15 @@ services:
       # Auto-run on FIRST start only (demo users + sample apps)
       - ./Backend/Scripts/sql/002_seed_data.sql:/docker-entrypoint-initdb.d/002_seed_data.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d Applicant_Reviewer_db"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U postgres -d Applicant_Reviewer_db && psql -U postgres -d Applicant_Reviewer_db -tAc \"SELECT 1 FROM users LIMIT 1\" | grep -q 1",
+        ]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 15
+      start_period: 30s
 
   # ==================== BACKEND (Express API) ====================
   backend:
