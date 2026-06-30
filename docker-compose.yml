@@ -1,19 +1,25 @@
 # ============================================================
-# DOCKER COMPOSE
+# DOCKER COMPOSE — 3 services (database + backend + frontend)
 # ============================================================
-# One file to start ALL services:
-#   db       = PostgreSQL database
-#   backend  = Express API
-#   frontend = React website
 #
-# Start command (from project root):
+# START (from project root):
 #   docker compose up --build
+#
+# WHAT STARTS:
+#   1. database  → PostgreSQL + your SQL scripts (tables + demo data)
+#   2. backend   → waits for database, then starts API on port 4000
+#   3. frontend  → React website on port 5173
+#
+# OPEN: http://localhost:5173
+#
+# NOTE: Stop your local PostgreSQL if it uses port 5432, or Docker will fail.
 
 services:
 
-  # ---------------- DATABASE ----------------
-  db:
+  # ==================== DATABASE (PostgreSQL) ====================
+  database:
     image: postgres:16-alpine
+    container_name: submission-database
     restart: unless-stopped
     environment:
       POSTGRES_DB: Applicant_Reviewer_db
@@ -22,8 +28,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      # Saves data between restarts
       - postgres_data:/var/lib/postgresql/data
+      # Auto-run on FIRST start only (creates tables)
       - ./Backend/Scripts/sql/001_create_schema.sql:/docker-entrypoint-initdb.d/001_create_schema.sql
+      # Auto-run on FIRST start only (demo users + sample apps)
       - ./Backend/Scripts/sql/002_seed_data.sql:/docker-entrypoint-initdb.d/002_seed_data.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d Applicant_Reviewer_db"]
@@ -31,14 +40,17 @@ services:
       timeout: 5s
       retries: 10
 
-  # ---------------- BACKEND ----------------
+  # ==================== BACKEND (Express API) ====================
   backend:
-    build: ./Backend
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: submission-backend
     restart: unless-stopped
     ports:
       - "4000:4000"
     environment:
-      DB_HOST: db
+      DB_HOST: database
       DB_PORT: 5432
       DB_NAME: Applicant_Reviewer_db
       DB_USER: postgres
@@ -46,15 +58,17 @@ services:
       JWT_SECRET: demo_jwt_secret_for_docker
       PORT: 4000
     depends_on:
-      db:
+      database:
         condition: service_healthy
 
-  # ---------------- FRONTEND ----------------
+  # ==================== FRONTEND (React) ====================
   frontend:
     build:
       context: ./Frontend
+      dockerfile: Dockerfile
       args:
         VITE_API_URL: http://localhost:4000
+    container_name: submission-frontend
     restart: unless-stopped
     ports:
       - "5173:80"

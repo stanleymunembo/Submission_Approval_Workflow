@@ -1,37 +1,35 @@
-# ============================================================
 # FRONTEND DOCKERFILE
-# ============================================================
-# React needs 2 steps in Docker:
-#   A) BUILD the website (npm run build)
-#   B) SERVE the built files (nginx)
+# Part 1: build React   Part 2: serve with nginx
 
-# ======================
-# PART A — BUILD REACT
-# ======================
 FROM node:20-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 
-COPY . .
+# Copy only source files (NOT node_modules — keeps build small and reliable)
+COPY index.html vite.config.ts tsconfig.json tsconfig.app.json tsconfig.node.json ./
+COPY public ./public
+COPY src ./src
 
-# Important: browser (on YOUR PC) calls API at localhost:4000
 ARG VITE_API_URL=http://localhost:4000
 ENV VITE_API_URL=$VITE_API_URL
 
 RUN npm run build
 
-# ======================
-# PART B — SERVE FILES
-# ======================
 FROM nginx:alpine
 
-# nginx config so /login, /reviewer/queue etc. work
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# copy built files from part A
+# Copy built website from part 1
 COPY --from=build /app/dist /usr/share/nginx/html
+
+# Nginx config written here (no separate file copy — avoids Windows Docker errors)
+RUN printf '%s\n' \
+  'server {' \
+  '    listen 80;' \
+  '    root /usr/share/nginx/html;' \
+  '    index index.html;' \
+  '    location / { try_files $uri $uri/ /index.html; }' \
+  '}' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
