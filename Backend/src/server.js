@@ -27,7 +27,11 @@ async function startServer() {
   }
 
   await waitForDatabase()
-  await initDatabase()
+  try {
+    await initDatabase()
+  } catch (err) {
+    console.error('Database init failed:', err.message)
+  }
 
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`)
